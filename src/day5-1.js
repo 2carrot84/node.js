@@ -1,9 +1,4 @@
 // @ts-check
-// require('core-js')
-//
-// const complicatedArray = [1, [2, 3]]
-// const flattendArray = complicatedArray.flat()
-// console.log(flattendArray)
 
 /**
  * 블로그 포스팅 서비스
@@ -15,29 +10,78 @@
 const http = require("http");
 
 /**
+ * @typedef Post
+ * @property {string} id
+ * @property {string} title
+ * @property {string} contents
+ */
+
+/** @type {Post[]} */
+const posts = [
+  {
+    id: "my_first_post",
+    title: "My first post",
+    content: "Hello world!"
+  },
+  {
+    id: "my_second_post",
+    title: "My second post",
+    content: "두번째 포스트"
+  }
+];
+
+/**
  * Post
  *
  * GET /posts
  * GET /posts/:id
  * POST /posts
  */
-
 const server = http.createServer((req, res) => {
   const POSTS_ID_REGEX = /^\/posts\/([a-zA-Z0-9-_]+)$/;
   const postIdRegexResult = (req.url && POSTS_ID_REGEX.exec(req.url)) || undefined;
   if (req.url === "/posts" && req.method === "GET") {
-    res.status = 200;
-    res.end("List of posts");
+    const result = {
+      posts: posts.map(post => ({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+      })),
+      totalCount: posts.length
+    };
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json; encoding=utf-8')
+    res.end(JSON.stringify(result));
   } else if (postIdRegexResult) {
     const postId = postIdRegexResult[1];
-    console.log(postId);
-    res.status = 200;
-    res.end("Some content of the post");
+    const post = posts.find(_post => _post.id === postId);
+
+    if (post) {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json; encoding=utf-8')
+      res.end(JSON.stringify(post));
+    } else {
+      res.statusCode = 404;
+      res.end("Post not found.");
+    }
   } else if (req.url === "/posts" && req.method === "POST") {
-    res.status = 200;
+    req.setEncoding('utf-8')
+    req.on('data', data => {
+      /** @type {Post} */
+      const body = JSON.parse(data)
+      console.log(body);
+      posts.push({
+        id: body.title.toLowerCase().replace(/\s/g,'_'),
+        title: body.title,
+        content: body.content,
+      })
+    })
+
+    res.statusCode = 200;
     res.end("Posting");
   } else {
-    res.status = 400;
+    res.statusCode = 404;
     res.end("Not Found.");
   }
 });
