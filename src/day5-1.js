@@ -8,28 +8,8 @@
  */
 
 const http = require("http");
-const {routes} = require("./api");
+const { routes } = require("./api");
 
-/**
- * @typedef Post
- * @property {string} id
- * @property {string} title
- * @property {string} contents
- */
-
-/** @type {Post[]} */
-const posts = [
-    {
-        id: "my_first_post",
-        title: "My first post",
-        content: "Hello world!"
-    },
-    {
-        id: "my_second_post",
-        title: "My second post",
-        content: "두번째 포스트"
-    }
-];
 
 /**
  * Post
@@ -39,31 +19,52 @@ const posts = [
  * POST /posts
  */
 const server = http.createServer((req, res) => {
-    async function main() {
-        const route = routes.find(_route => req.url &&
-            req.method &&
-            _route.url.test(req.url) &&
-            _route.method === req.method
-        )
+  async function main() {
+    const route = routes.find(_route => req.url &&
+      req.method &&
+      _route.url.test(req.url) &&
+      _route.method === req.method
+    );
 
-        if (!route) {
-            res.statusCode = 404;
-            res.end("Not Found.");
-        }
-
-        const result = await route.callback()
-        res.statusCode = result.statusCode
-
-        if (typeof result.body === 'string') {
-          res.end(result.body)
-        } else {
-          res.setHeader('Content-Type', 'application/json; encoding=utf-8')
-          res.end(JSON.stringify(result.body));
-        }
+    if (!req.url || !route) {
+      res.statusCode = 404;
+      res.end("Not Found.");
     }
 
-    main()
-})
+    const regexResult = route.url.exec(req.url);
+
+    if (!regexResult) {
+      res.statusCode = 404;
+      res.end("Not Found.");
+      return;
+    }
+
+    /** @type {Object.<string, *> | undefined} */
+    const reqBody = (req.headers["content-type"] === "application/json" &&
+      (await new Promise((resolve, reject) => {
+        req.setEncoding("utf-8");
+        req.on("data", data => {
+          try {
+            resolve(JSON.parse(data));
+          } catch {
+            reject(new Error("Ill-formed json"));
+          }
+        });
+      }))) || undefined;
+
+    const result = await route.callback(regexResult, reqBody);
+    res.statusCode = result.statusCode;
+
+    if (typeof result.body === "string") {
+      res.end(result.body);
+    } else {
+      res.setHeader("Content-Type", "application/json; encoding=utf-8");
+      res.end(JSON.stringify(result.body));
+    }
+  }
+
+  main();
+});
 
 /*const POSTS_ID_REGEX = /^\/posts\/([a-zA-Z0-9-_]+)$/;
 const postIdRegexResult = (req.url && POSTS_ID_REGEX.exec(req.url)) || undefined;
@@ -117,5 +118,5 @@ if (req.url === "/posts" && req.method === "GET") {
 const PORT = 4000;
 
 server.listen(PORT, () => {
-    console.log("The server is listening on port: ", PORT);
+  console.log("The server is listening on port: ", PORT);
 });
