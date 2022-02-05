@@ -1,16 +1,21 @@
 // @ts-check
 
 const express = require("express");
+const multer = require('multer')
 // const bodyParser = require("body-parser");
+
+const upload = multer({ dest: 'uploads/'})
 
 const router = express.Router();
 
 const USERS = {
   15: {
     nickname: 'foo',
+    profileImageKey: undefined,
   },
   16: {
     nickname: 'bar',
+    profileImageKey: undefined,
   }
 }
 
@@ -42,7 +47,9 @@ router.get("/:id", (req, res, next) => {
     res.send(req.user)
   } else if (resMineType === 'html') {
     res.render('user-profile', {
-      nickname: req.user.nickname
+      nickname: req.user.nickname,
+      userId: req.params.id,
+      profileImageURL: `/uploads/${req.user.profileImageKey}`
     })
   }
 })
@@ -59,6 +66,14 @@ router.post("/:id/nickname", (req, res, next) => {
   user.nickname = nickname
 
   res.send('user registe')
+})
+
+router.post('/:id/profile', upload.single('profile'), (req, res) => {
+  req.files
+  const { user } = req
+  const { filename } = req.file
+  user.profileImageKey = filename
+  res.send(`User profile image uploaded ${filename}`)
 })
 
 module.exports = router

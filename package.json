@@ -2,7 +2,7 @@
   "scripts": {
     "test": "jest",
     "build": "esbuild src/day5.js --bundle --outfile=build/day5.js --target=node10.16",
-    "server": "nodemon src/day9.js"
+    "server": "nodemon src/day9-1.js"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
@@ -25,6 +25,7 @@
     "core-js": "^3.20.3",
     "esbuild": "^0.14.12",
     "express": "^4.17.2",
+    "multer": "^1.4.4",
     "pug": "^3.0.2"
   }
 }
