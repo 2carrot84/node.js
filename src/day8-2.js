@@ -7,6 +7,7 @@ const userRouter = express.Router();
 const app = express();
 
 app.use(express.json())
+app.use(express.static('src/public'))
 app.set('views', 'src/views')
 app.set('view engine', 'pug')
 

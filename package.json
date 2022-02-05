@@ -2,7 +2,7 @@
   "scripts": {
     "test": "echo \"Hello, world!\"",
     "build": "esbuild src/day5.js --bundle --outfile=build/day5.js --target=node10.16",
-    "server": "nodemon src/day8-2.js"
+    "server": "nodemon src/day9.js"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
