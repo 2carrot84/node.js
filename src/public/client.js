@@ -33,7 +33,7 @@
   formEl.addEventListener("submit", (event) => {
     event.preventDefault();  // form submit 막기
     socket.send(JSON.stringify({
-      nickName: myNickname,
+      nickname: myNickname,
       message: inputEl.value
     }));
     inputEl.value = "";
@@ -43,15 +43,26 @@
     socket.send("Hello, server!")
   })*/
 
-  socket.addEventListener("message", (event) => {
-    chats.push(JSON.parse(event.data));
+  const drawChats = () => {
     chatsEl.innerHTML = "";
-
-    chats.forEach(({ message, nickName }) => {
+    chats.forEach(({ message, nickname }) => {
       const div = document.createElement("div");
-      div.innerText = `${nickName}: ${message}`;
+      div.innerText = `${nickname}: ${message}`;
       chatsEl.appendChild(div);
     });
+  };
 
+  socket.addEventListener("message", (event) => {
+    const { type, payload } = JSON.parse(event.data);
+
+    if (type === "sync") {
+      const { chats: syncedChats } = payload;
+      chats.push(...syncedChats);
+    } else if (type === "chat") {
+      const chat = payload;
+      chats.push(chat);
+    }
+
+    drawChats();
   });
 })();

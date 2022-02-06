@@ -5,6 +5,7 @@ const route = require("koa-route");
 const serve = require("koa-static");
 const mount = require("koa-mount");
 const websockify = require("koa-websocket");
+const mongoclient = require('./chat_mongo')
 
 const app = websockify(new Koa());
 
@@ -18,20 +19,46 @@ app.use(mount("/public", serve("src/public")));
 app.use(async (ctx, next) => {
   await ctx.render("main");
 });
+const _client = mongoclient.connect()
+
+async function getChatsCollection() {
+  const client = await _client
+  return client.db('chat').collection('chats')
+}
 
 // Using routes
 app.ws.use(
-  route.all("/ws", (ctx) => {
-    // `ctx` is the regular koa context created from the `ws` onConnection `socket.upgradeReq` object.
-    // the websocket is added to the context on `ctx.websocket`.
-    ctx.websocket.on("message", (data) => {
-      // do something with the message from client
+  route.all("/ws", async (ctx) => {
+    const chatsCollection = await getChatsCollection()
+    const chatsCursor = chatsCollection.find({}, {
+      sort: {
+        createdAt: 1,
+      }
+    })
+    const chats = await chatsCursor.toArray()
+    ctx.websocket.send(
+       JSON.stringify({
+        type: 'sync',
+        payload: {
+          chats
+        }
+      })
+    )
+
+
+    ctx.websocket.on("message", async (data) => {
       if (typeof data !== "string") {
         return;
       }
 
-      const { message, nickName } = JSON.parse(data);
+      /** @type {Chat} */
+      const chat = JSON.parse(data);
+      await chatsCollection.insertOne({
+        ...chat,
+        createdAt: new Date(),
+      })
 
+      const { nickname, message } = chat
       const { server } = app.ws;
 
       if (!server) {
@@ -41,8 +68,11 @@ app.ws.use(
       server.clients.forEach(client => {
         client.send(
           JSON.stringify({
-            message: message,
-            nickName: nickName
+            type: 'chat',
+            payload: {
+              message: message,
+              nickname: nickname
+            }
           }));
       });
     });
