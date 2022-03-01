@@ -1,0 +1,8 @@
+button {
+    background: white;
+    color: green;
+    border: 1px solid blue;
+    & > span {
+        color: red;
+    }
+}
