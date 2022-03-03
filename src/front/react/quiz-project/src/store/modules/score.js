@@ -53,6 +53,22 @@ const initialState = {
         text: "대전",
         isCorrect: false
       }]
+    },
+    {
+      q: "미국의 수도는?",
+      a: [{
+        text: "샌프란시스코",
+        isCorrect: false
+      }, {
+        text: "보스턴",
+        isCorrect: false
+      }, {
+        text: "워싱턴 D.C",
+        isCorrect: true
+      }, {
+        text: "뉴욕",
+        isCorrect: false
+      }]
     }
   ]
 };

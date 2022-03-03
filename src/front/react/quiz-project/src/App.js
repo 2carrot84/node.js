@@ -1,5 +1,6 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux"
+import { Quiz } from "./components/Quiz"
 import { PinkButton } from "./components/PinkButton"
 import { next } from "./store/modules/score"
 import styled from "styled-components"
@@ -42,6 +43,11 @@ function App() {
             dispatch(next());
           }}
           />
+        </Main>
+      )}
+      {page > 0 && (
+        <Main>
+          <Quiz></Quiz>
         </Main>
       )}
     </>
