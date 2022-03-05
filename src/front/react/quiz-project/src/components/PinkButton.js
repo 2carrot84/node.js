@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 const MyButton = styled.a`
-    width: 100px;
+    width: 110px;
     position: relative;
     display: inline-block;
     cursor: pointer;

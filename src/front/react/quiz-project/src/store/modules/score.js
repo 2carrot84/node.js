@@ -12,10 +12,10 @@ const NEXT_PAGE = "score/NEXT_PAGE";
 const RESET = "score/RESET";
 
 // 액션 생성 함수
-export function check({ quizIndex, answer }) {
+export function check({ isCorrect }) {
   return {
     type: CHECK_CORRECT,
-    payload: { quizIndex, answer }
+    payload: { isCorrect }
   };
 }
 
@@ -40,6 +40,7 @@ const initialState = {
   quizs: [
     {
       q: "대한민국의 수도는?",
+      img: "/city/korea.jpg",
       a: [{
         text: "서울",
         isCorrect: true
@@ -56,6 +57,7 @@ const initialState = {
     },
     {
       q: "미국의 수도는?",
+      img: "/city/us.jpg",
       a: [{
         text: "샌프란시스코",
         isCorrect: false
@@ -79,7 +81,7 @@ export default function score(state = initialState, action) {
     case CHECK_CORRECT:
       return {
         ...state,
-        score: state.quizs[action.payload.quizIndex].isCorrect
+        score: action.payload.isCorrect
           ? state.score + 10
           : state.score,
       };

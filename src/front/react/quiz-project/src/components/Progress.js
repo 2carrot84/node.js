@@ -1,4 +1,5 @@
 import React from "react";
+import "./Progress.css"
 
 export function Progress({ page, maxPage }) {
   return (
@@ -7,7 +8,7 @@ export function Progress({ page, maxPage }) {
         {page} / {maxPage}
       </div>
       <div className="gauge">
-        <span className="fill" style={{width: `${page / maxPage * 100}`}}></span>
+        <span className="fill" style={{width: `${(page - 1) / maxPage * 100}%`}} />
       </div>
     </div>
   );
